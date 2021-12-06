@@ -10,6 +10,7 @@ import rctf
 
 @click.command()
 @click.option('-u', '--url', envvar='RCTF_URL', help='rCTF URL to monitor', required=True)
+@click.option('-p', '--public-url', envvar='RCTF_PUBLIC_URL', help='Public rCTF URL for profile links')
 @click.option('-t', '--token', envvar='RCTF_TOKEN', help='rCTF token', required=True)
 @click.option('-d', '--division', multiple=True, envvar='RCTF_DIVISION', help='rCTF division(s) to include  [default: all]')
 @click.option('-w', '--discord-webhook', envvar='DISCORD_WEBHOOK', help='Discord webhook URL', required=True)
@@ -17,6 +18,9 @@ import rctf
 @click.option('-l', '--log-level', type=LogLevel(), default='INFO', envvar='LOG_LEVEL', help='Log level', show_default=True)
 def main(url, public_url, token, discord_webhook, interval, division, log_level):
   logging.basicConfig(level=log_level)
+
+  if public_url is None:
+    public_url = url
 
   client = rctf.RCTFClient(url, token)
   config = client.config()
@@ -40,7 +44,7 @@ def main(url, public_url, token, discord_webhook, interval, division, log_level)
   def notify(challenge, blooder):
     userId = blooder['userId']
     userName = blooder['userName']
-    url = urllib.parse.urljoin(client.url, f'/profile/{userId}')
+    url = urllib.parse.urljoin(public_url, f'/profile/{userId}')
     challName = challenge['name']
     logging.info(f'Notifying for {challName} ({challenge["id"]})')
     msg = f'Congratulations to [`{userName}`](<{url}>) for first blood on `{challName}`!'
