@@ -9,21 +9,22 @@ from discord_webhook import DiscordWebhook
 import rctf
 
 @click.command()
-@click.option('-u', '--rctf-url', help='rCTF instance to monitor', required=True)
+@click.option('-u', '--url', envvar='RCTF_URL', help='rCTF URL to monitor', required=True)
 @click.option('-t', '--token', envvar='RCTF_TOKEN', help='rCTF token', required=True)
-@click.option('-w', '--discord-webhook', envvar='DISCORD_WEBHOOK', help='Discord webhook', required=True)
-@click.option('-i', '--interval', default=60, help='Seconds between checks', required=True)
-@click.option('-d', '--division', multiple=True, help='Division(s) to include')
-@click.option('-l', '--log-level', type=LogLevel(), default=logging.INFO, help='Log level', required=True)
-def main(rctf_url, token, discord_webhook, interval, division, log_level):
+@click.option('-d', '--division', multiple=True, envvar='RCTF_DIVISION', help='rCTF division(s) to include  [default: all]')
+@click.option('-w', '--discord-webhook', envvar='DISCORD_WEBHOOK', help='Discord webhook URL', required=True)
+@click.option('-i', '--interval', default=60, envvar='BLOOD_INTERVAL', help='Seconds between checks', show_default=True)
+@click.option('-l', '--log-level', type=LogLevel(), default='INFO', envvar='LOG_LEVEL', help='Log level', show_default=True)
+def main(url, public_url, token, discord_webhook, interval, division, log_level):
   logging.basicConfig(level=log_level)
 
-  client = rctf.RCTFClient(rctf_url, token)
+  client = rctf.RCTFClient(url, token)
   config = client.config()
+  divisions = set()
   for d in division:
     if d not in config['divisions']:
       raise ValueError(f'invalid division {d}')
-  divisions = set(division)
+    divisions.add(d)
 
   def get_blooder(challenge):
     if challenge['solves'] == 0:
