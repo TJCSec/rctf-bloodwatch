@@ -30,6 +30,14 @@ def main(url, public_url, token, discord_webhook, interval, division, log_level)
       raise ValueError(f'invalid division {d}')
     divisions.add(d)
 
+  def get_challenges():
+    try:
+      return client.get_challenges()
+    except rctf.APIError as e:
+      if e.kind == 'badNotStarted':
+        return []
+      raise e
+
   def get_blooder(challenge):
     if challenge['solves'] == 0:
       return None
@@ -53,7 +61,7 @@ def main(url, public_url, token, discord_webhook, interval, division, log_level)
 
   logging.info('Loading solved challenges')
   blooded = set()
-  for challenge in client.get_challenges():
+  for challenge in get_challenges():
     logging.debug(f'Checking {challenge["name"]} ({challenge["id"]})')
     if get_blooder(challenge) is not None:
       blooded.add(challenge['id'])
@@ -63,7 +71,7 @@ def main(url, public_url, token, discord_webhook, interval, division, log_level)
     logging.debug(f'Sleeping for {interval} seconds')
     time.sleep(interval)
     logging.info('Checking for first bloods')
-    for challenge in client.get_challenges():
+    for challenge in get_challenges():
       if challenge['id'] in blooded:
         logging.debug(f'Skipping {challenge["name"]} ({challenge["id"]})')
         continue
