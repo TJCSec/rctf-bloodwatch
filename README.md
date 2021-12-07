@@ -17,7 +17,7 @@
 `--division` can be specified multiple times to include multiple divisions. Alternatively, specify a space-separated list in `RCTF_DIVISION`.
 
 ### Message
-`--message` is a format string with these variables available:
+`--message` is a template string with these variables available:
 
 - `challenge` (challenge object)
 - `blooder` (solve object)
@@ -25,7 +25,7 @@
 See [rCTF](https://github.com/redpwn/rctf) for the shape of these objects. Here's an example message:
 
 ```
-Congratulations to [`{blooder[userName]}`](<https://ctf.tjcsec.club/profile/{blooder[userId]}>) for first blood on `{challenge[name]}`!
+Congratulations to [`{{ blooder.userName | replace("`", "") }}`](<https://ctf.tjcsec.club/profile/{{ blooder.userId }}>) for first blood on `{{ challenge.name }}`!
 ```
 
 This sends a message that looks like this:

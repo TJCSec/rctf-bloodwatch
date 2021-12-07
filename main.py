@@ -4,6 +4,7 @@ import logging
 import click
 from click_loglevel import LogLevel
 from discord_webhook import DiscordWebhook
+from jinja2 import Template
 
 import rctf
 
@@ -18,6 +19,8 @@ import rctf
 def main(url, token, discord_webhook, interval, message, division, log_level):
   logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
   logger = logging.getLogger('bloodwatch')
+
+  template = Template(message)
 
   client = rctf.RCTFClient(url, token)
   config = client.config()
@@ -49,11 +52,7 @@ def main(url, token, discord_webhook, interval, message, division, log_level):
 
   def notify(challenge, blooder):
     logger.info(f'Notifying {challenge["name"]} ({challenge["id"]})')
-    vars = {
-      'challenge': challenge,
-      'blooder': blooder,
-    }
-    content = message.format(**vars)
+    content = template.render(challenge=challenge, blooder=blooder)
     webhook = DiscordWebhook(url=discord_webhook, content=content, allowed_mentions={'parse': []})
     return webhook.execute()
 
