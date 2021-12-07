@@ -10,7 +10,7 @@ import rctf
 @click.command(name='rctf-bloodwatch')
 @click.option('-u', '--url', envvar='RCTF_URL', help='rCTF URL to monitor', required=True)
 @click.option('-t', '--token', envvar='RCTF_TOKEN', help='rCTF API token', required=True)
-@click.option('-d', '--division', multiple=True, envvar='RCTF_DIVISION', help='rCTF division(s) to include  [default: all]')
+@click.option('-d', '--division', multiple=True, envvar='RCTF_DIVISION', help='rCTF division(s) to include', show_default='all divisions')
 @click.option('-w', '--discord-webhook', envvar='DISCORD_WEBHOOK', help='Discord webhook URL', required=True)
 @click.option('-m', '--message', envvar='BLOOD_MESSAGE', help='Message to send to webhook', required=True)
 @click.option('-i', '--interval', default=60, envvar='BLOOD_INTERVAL', help='Seconds between checks', show_default=True)

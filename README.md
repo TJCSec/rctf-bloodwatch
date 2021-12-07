@@ -10,7 +10,7 @@
 | `-d` / `--division`        | `RCTF_DIVISION`   | no       | _all divisions_ | string                                                    | rCTF division(s) to include |
 | `-w` / `--discord-webhook` | `DISCORD_WEBHOOK` | yes      | _(none)_        | string                                                    | Discord webhook URL         |
 | `-m` / `--message`         | `BLOOD_MESSAGE`   | yes      | _(none)_        | string                                                    | Message to send to webhook  |
-| `-i` / `--interval`        | `BLOOD_INTERVAL`  | yes      | 60              | integer                                                   | Seconds between checks      |
+| `-i` / `--interval`        | `BLOOD_INTERVAL`  | no       | 60              | integer                                                   | Seconds between checks      |
 | `-l` / `--log-level`       | `LOG_LEVEL`       | no       | `INFO`          | `NOTSET \| DEBUG \| INFO \| WARNING \| ERROR \| CRITICAL` | Log level                   |
 
 ### Divisions
