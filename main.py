@@ -16,7 +16,8 @@ import rctf
 @click.option('-i', '--interval', default=60, envvar='BLOOD_INTERVAL', help='Seconds between checks', show_default=True)
 @click.option('-l', '--log-level', type=LogLevel(), default='INFO', envvar='LOG_LEVEL', help='Log level', show_default=True)
 def main(url, token, discord_webhook, interval, message, division, log_level):
-  logging.basicConfig(level=log_level)
+  logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+  logger = logging.getLogger('bloodwatch')
 
   client = rctf.RCTFClient(url, token)
   config = client.config()
@@ -31,6 +32,7 @@ def main(url, token, discord_webhook, interval, message, division, log_level):
       return client.get_challenges()
     except rctf.APIError as e:
       if e.kind == 'badNotStarted':
+        logger.warn('CTF has not started yet')
         return []
       raise e
 
@@ -41,39 +43,41 @@ def main(url, token, discord_webhook, interval, message, division, log_level):
     while (solves := client.get_solves(challenge['id'], limit=10, offset=i * 10)['solves']):
       for solve in solves:
         if not divisions or client.public_profile(solve['userId'])['division'] in divisions:
-          logging.debug(f'Challenge {challenge["name"]} ({challenge["id"]}) blooded by {solve["userName"]} ({solve["userId"]})')
+          logger.debug(f'Challenge {challenge["name"]} ({challenge["id"]}) blooded by {solve["userName"]} ({solve["userId"]})')
           return solve
       i += 1
 
   def notify(challenge, blooder):
-    logging.info(f'Notifying for {challenge["name"]} ({challenge["id"]})')
+    logger.info(f'Notifying {challenge["name"]} ({challenge["id"]})')
     vars = {
       'challenge': challenge,
       'blooder': blooder,
     }
     content = message.format(**vars)
     webhook = DiscordWebhook(url=discord_webhook, content=content, allowed_mentions={'parse': []})
-    webhook.execute()
+    return webhook.execute()
 
-  logging.info('Loading solved challenges')
+  logger.info('Loading solved challenges')
   blooded = set()
   for challenge in get_challenges():
-    logging.debug(f'Checking {challenge["name"]} ({challenge["id"]})')
+    logger.debug(f'Checking {challenge["name"]} ({challenge["id"]})')
     if get_blooder(challenge) is not None:
       blooded.add(challenge['id'])
-  logging.info(f'Loaded {len(blooded)} solved challenges')
+  logger.info(f'Loaded {len(blooded)} solved challenges')
 
   while True:
-    logging.debug(f'Sleeping for {interval} seconds')
+    logger.debug(f'Sleeping for {interval} seconds')
     time.sleep(interval)
-    logging.info('Checking for first bloods')
+    logger.info('Checking for first bloods')
     for challenge in get_challenges():
       if challenge['id'] in blooded:
-        logging.debug(f'Skipping {challenge["name"]} ({challenge["id"]})')
+        logger.debug(f'Skipping {challenge["name"]} ({challenge["id"]})')
         continue
-      logging.debug(f'Checking {challenge["name"]} ({challenge["id"]})')
+      logger.debug(f'Checking {challenge["name"]} ({challenge["id"]})')
       if (blooder := get_blooder(challenge)) is not None:
-        notify(challenge, blooder)
-        blooded.add(challenge['id'])
+        if notify(challenge, blooder).status_code in {200, 204}:
+          blooded.add(challenge['id'])
+        else:
+          logger.error(f'Failed to notify {challenge["name"]} ({challenge["id"]})')
 
 if __name__ == '__main__': main()
