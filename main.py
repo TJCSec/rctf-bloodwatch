@@ -35,7 +35,7 @@ def main(url, token, discord_webhook, interval, message, division, log_level):
       return client.get_challenges()
     except rctf.APIError as e:
       if e.kind == 'badNotStarted':
-        logger.warn('CTF has not started yet')
+        logger.warning('CTF has not started yet')
         return []
       raise e
 

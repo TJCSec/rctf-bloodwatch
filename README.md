@@ -31,3 +31,16 @@ Congratulations to [`{{ blooder.userName | replace("`", "") }}`](<https://ctf.tj
 This sends a message that looks like this:
 
 ![example webhook message](./images/example.png)
+
+## Sample Usage
+```yaml
+version: '3'
+services:
+  blood:
+    image: ghcr.io/tjcsec/rctf-bloodwatch
+    restart: always
+    environment:
+      - RCTF_TOKEN=sice
+      - DISCORD_WEBHOOK=deets
+    command: ['-u', 'http://rctf/', '-m', 'Congratulations to [`{{ blooder.userName | replace("`", "") }}`](<https://rctf/profile/{{ blooder.userId }}>) for first blood on `{{ challenge.category }}/{{ challenge.name }}`!']
+```
